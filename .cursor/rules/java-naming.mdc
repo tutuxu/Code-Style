@@ -1,0 +1,68 @@
+---
+description: loit-bicycle 命名规范（包/类/变量）；包名全小写；@java-naming（兼 @java-package-naming）
+globs: loit-service/loit-bicycle/**/*.java
+alwaysApply: false
+---
+
+# Java 命名规范（loit-bicycle）
+
+## 总则（包名与标识符均适用）
+
+- 使用有意义的英文单词；禁止意义不明的缩写、拼音拼接、含糊缩写段。
+- 缩写白名单以 [`java-package-abbrev-whitelist.mdc`](java-package-abbrev-whitelist.mdc) 为准；**未列入白名单的缩写不得作为独立词段**出现在任何新建命名中（包段或类/方法/字段等标识符词段）。
+- 白名单缩写须作为**独立词段**，不得与相邻词粘成难以辨认的整体：
+  - 包：`school.mgr`（两段），禁止 `schoolmgr`
+  - 类：`SchoolMgr`，禁止 `Schoolmgr`；需全词时用 `SchoolManagement`
+  - 变量：`schoolMgr`，禁止 `schoolmgr`
+- 修改触及的代码按本规范补齐；存量（`regionmgr` 包、`RegionMgr*` 类）保留，不批量重命名。
+
+维护白名单：对话 `白名单添加 xxx` 或 `@java-package-abbrev-whitelist`。
+
+## 包名（仅此节要求全小写）
+
+- 各包段仅使用**全小写**英文字母，沿用 `com.loit.modules.*` 等既有根路径。
+- 多词业务域用完整英文单词作包段，或用 `.` 分隔多段；白名单缩写仅作**单独包段**。
+- 新建包保持扁平可读，避免无业务理由的过深嵌套。
+
+禁止无意义拼接（单包段内多词缩写粘连），例如：
+
+- `regionmgr` → `region` 或 `region.management` 或 `region.mgr`（`mgr` 在白名单时）
+- `datatree` → `data.tree`
+- `bicycleapply` → `bicycle.apply`
+- `schoolmgr` → `school.mgr`
+
+新建包示例：
+
+```text
+com.loit.modules.region.management
+com.loit.modules.school.mgr
+com.loit.modules.bicycle.apply
+com.loit.modules.company.dto
+```
+
+## 类、接口、枚举
+
+- 使用 **PascalCase**；每个逻辑词首字母大写。
+- 白名单词段按 PascalCase 嵌入：`Dto`、`Vo`、`Bo`、`Mgr` 等（与 `RegionMgrSchoolSaveDto` 一致）。
+
+| 场景 | 合规 | 不合规 |
+|------|------|--------|
+| 学校区域管理 | `SchoolMgrService` | `SchoolmgrService`、`schoolMgrService` |
+| DTO | `SchoolSaveDto` | `SchoolSavedto` |
+
+## 方法、字段、参数、局部变量
+
+- 使用 **camelCase**；白名单词段首字母大写嵌入：`schoolMgrId`、`findByMgrCode`。
+- getter/setter 遵循 JavaBean 惯例。
+
+## 常量
+
+- `static final` 字段：**UPPER_SNAKE_CASE**；白名单词段大写：`DEFAULT_MGR_CODE`。
+
+## 验收示例（`mgr` 在白名单）
+
+| 类型 | 合规 | 不合规 |
+|------|------|--------|
+| 包 | `com.loit.modules.school.mgr` | `...schoolmgr`、`...schoolMgr` |
+| 类 | `SchoolMgrController` | `SchoolmgrController` |
+| 字段 | `private String schoolMgrCode` | `private String schoolmgrCode` |

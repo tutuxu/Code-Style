@@ -1,0 +1,124 @@
+---
+description: loit-bicycle 命名缩写白名单（包段与类/方法/字段词段）；对话「白名单添加 xxx」自动写入（@java-package-abbrev-whitelist）
+globs: loit-service/loit-bicycle/**/*.java
+alwaysApply: false
+---
+
+# 命名缩写白名单（loit-bicycle）
+
+本文件为**可维护白名单**：下列缩写可作为**独立包段**或**标识符中的独立词段**（类/方法/字段等）使用；未列入的缩写默认视为禁止（见 `@java-naming` / `@java-package-naming`）。
+
+## 对话维护协议（Agent 必须执行）
+
+用户在对话框中要求维护白名单时，**直接编辑本文件** `java-package-abbrev-whitelist.mdc`，勿只口头确认。
+
+### 匹配规则
+
+- **大小写**：比较与写入时一律视为不区分大小写；落盘格式统一为**全小写**（如用户输入 `DTO` → 写入 `dto`）。
+- **去重**：若缩写（忽略大小写）已存在于任一张量表或「机器可读列表」中，跳过并告知「`xxx` 已在白名单中」，不重复添加。
+
+### 添加 — 触发语句（任一种即可）
+
+用户消息包含以下模式时视为**添加**指令，提取其后缩写（支持多个，逗号/空格/顿号分隔）：
+
+- `白名单添加 <缩写>` / `添加白名单 <缩写>` / `加入白名单 <缩写>`
+- `whitelist add <缩写>` / `@java-package-abbrev-whitelist add <缩写>`
+- `+白名单 <缩写>`
+
+可选：`白名单添加 <缩写> <含义>` — 若用户提供含义，写入「含义」列；未提供则含义填 `（待补充）`。
+
+**写入位置**：默认追加到「项目 / 业务」表；用户指明分类（如「加到架构角色」）则写入对应章节表格。
+
+**必须同步**：每新增一条，在「机器可读列表」代码块中追加该小写缩写（保持逗号分隔、每行不宜过长可换行）。
+
+完成后简短回复：已添加项、已跳过重复项、更新后的条目数。
+
+### 移除 — 触发语句
+
+- `白名单移除 <缩写>` / `移除白名单 <缩写>` / `whitelist remove <缩写>`
+
+从所有章节表格删除对应行（忽略大小写匹配），并从「机器可读列表」中删除该缩写。不存在则告知未找到。
+
+### 查询
+
+- `白名单列表` / `列出白名单` — 回复当前机器可读列表，无需改文件。
+
+---
+
+## 分层 / 类型
+
+| 缩写 | 含义 |
+|------|------|
+| `dto` | Data Transfer Object |
+| `vo` | View Object |
+| `bo` | Business Object |
+| `entity` | 持久化实体 |
+| `dao` | Data Access Object |
+
+## 架构角色
+
+| 缩写 | 含义 |
+|------|------|
+| `api` | 对外或模块 API |
+| `controller` | Web 控制器 |
+| `service` | 业务服务 |
+| `impl` | 接口实现 |
+| `handler` | 事件或消息处理 |
+| `listener` | 监听器 |
+| `consumer` | 消息消费者 |
+| `producer` | 消息生产者 |
+
+## 基础设施 / 通用
+
+| 缩写 | 含义 |
+|------|------|
+| `config` | 配置 |
+| `constant` | 常量 |
+| `constants` | 常量（复数段名，与存量一致时允许） |
+| `enums` | 枚举 |
+| `util` | 工具类 |
+| `common` | 公共模块（根路径沿用） |
+| `convert` | 类型/字典转换器（company 模块 `convert` 包） |
+
+## 项目 / 业务（对话添加默认落点）
+
+| 缩写 | 含义 | 备注 |
+|------|------|------|
+| `mgr` | 区域管理 | regionmgr 模块标识符词段 `RegionMgr*` |
+| `cfg` | 配置 | company：`BicycleCompanyApiCfg*` |
+| `sql` | SQL 片段/查询对象 | company：`BicycleVehicleSqlBriefBo` 等 |
+| `agg` | 聚合 | company：`CompanyProblemOverviewAggBo` 等 |
+| `stat` | 统计 | company/regionmgr：`GroupStatVo`、`StatDto` 等 |
+| `stats` | 统计（复数词段） | company：`CompanyOperationLedgerStatsVo` 等 |
+| `feign` | Feign 远程调用 | company：`BicycleCompanyFeignController` |
+| `census` | 普查/汇总 | regionmgr：`RegionMgrSchoolCensusVo` 等 |
+| `mongo` | MongoDB 文档 | regionmgr：`ElectronicFenceMongoDoc` |
+| `regionmgr` | 区域管理模块（存量包段） | 仅 `com.loit.modules.regionmgr` 存量路径，新建优先 `region.mgr` |
+
+## 机器可读列表（供 Agent 快速匹配）
+
+以下与上表各章节**完全同步**；对话增删后**必须**更新本段（全小写、逗号分隔）：
+
+```
+dto, vo, bo, entity, dao, api, config, constant, constants, enums, util, common, convert,
+controller, service, impl, handler, listener, consumer, producer,
+mgr, cfg, sql, agg, stat, stats, feign, census, mongo, regionmgr
+```
+
+## 模块扫描备案（company / regionmgr）
+
+- **company**（241 个 Java 文件）：包段 `bo/dto/vo/dao/entity/controller/service/convert/listener/util`；标识符高频词段 `Cfg`、`Sql`、`Agg`、`Stat`/`Stats`、`Feign`；`company` 为全词模块名，未入白名单。
+- **regionmgr**（56 个 Java 文件）：存量包段 `regionmgr`；标识符前缀 `RegionMgr*`（依赖 `mgr`）；`Census`、`Mongo`、`Stat`；`NoParking`/`BicycleStacking`/`Division` 为全词未收录。
+
+## 标识符与包段示例
+
+| 缩写 | 包段 | 类 | 字段 |
+|------|------|-----|------|
+| `mgr` | `...school.mgr` | `SchoolMgrController` | `schoolMgrCode` |
+| `cfg` | — | `BicycleCompanyApiCfg` | `apiCfgId` |
+| `census` | — | `RegionMgrSchoolCensusVo` | `schoolCensusCount` |
+
+## 手动维护
+
+- 命名评审：`@java-naming` + `@java-package-abbrev-whitelist`
+- 对话：`白名单添加 mgr 区域管理` — Agent 按上文协议自动改文件

@@ -1,0 +1,53 @@
+---
+description: loit-bicycle Java 方法 JavaDoc 与多步骤行内注释规范（@java-javadoc）
+globs: loit-service/loit-bicycle/**/*.java
+alwaysApply: false
+---
+
+# JavaDoc 与多步骤注释（loit-bicycle）
+
+## 方法头 JavaDoc
+
+- 每个方法（`public` / `protected` / `private`、静态、构造方法）声明前必须有标准 JavaDoc（`/** ... */`），不得用单行 `//` 代替方法说明。
+- 至少写清方法用途；有参数写 `@param`，有返回值写 `@return`，有受检或业务异常写 `@throws`（按实际需要，非机械堆砌）。
+- 类级 JavaDoc 不能替代方法级 JavaDoc。
+
+## 方法内多步骤注释
+
+- 逻辑分多段时，在各逻辑块之间用单行 `//` 说明该段在做什么。
+- 注释只描述阶段语义，禁止分步编号或标识。
+
+禁止：`步骤1`、`第一步`、`Step 1`、`1.`、`阶段一`、`①` 等。
+
+允许：`// 从请求头解析当前用户 ID`、`// 调用门户接口并映射为 User 对象`
+
+- 仅一两行、无清晰阶段的 trivial 方法：保留 JavaDoc，方法内可不加分段注释。
+
+## 存量代码
+
+- 修改某文件时，对本次触及的方法补齐 JavaDoc 与分段注释；未改动的旧方法不在本任务中批量补全。
+
+## 示例
+
+```java
+// BAD：无方法 JavaDoc；分步编号
+public User getUser() {
+    // 步骤1：取 userId
+    String userId = getUserId();
+    // 步骤2：调接口
+    ...
+}
+
+// GOOD
+/**
+ * 根据当前登录用户 ID 调用门户接口，返回完整用户对象；本地调试无 ID 时返回模拟管理员。
+ *
+ * @return 当前用户；无法获取或调用失败时可能为 null
+ */
+public User getUser() {
+    // 解析当前登录用户 ID
+    String userId = getUserId();
+    // 通过 Feign 代理调用门户获取人员信息
+    ...
+}
+```
