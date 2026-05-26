@@ -16,7 +16,7 @@ alwaysApply: false
   - 变量：`schoolMgr`，禁止 `schoolmgr`
 - 修改触及的代码按本规范补齐；存量（`regionmgr` 包、`RegionMgr*` 类）保留，不批量重命名。
 
-维护白名单：对话 `白名单添加 xxx` 或 `@java-package-abbrev-whitelist`。
+维护白名单：对话 `白名单添加 xxx` 或 `@java-package-abbrev-whitelist`。业务缩写重建：`白名单初始化`（清空业务缩写，保留 dto/vo/dao 等结构缩写）— 见 `@java-package-abbrev-whitelist`。
 
 ## 包名（仅此节要求全小写）
 

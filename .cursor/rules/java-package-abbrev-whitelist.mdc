@@ -1,21 +1,60 @@
 ---
-description: loit-bicycle 命名缩写白名单（包段与类/方法/字段词段）；对话「白名单添加 xxx」自动写入（@java-package-abbrev-whitelist）
+description: loit-bicycle 命名缩写白名单；对话「白名单添加 xxx」写入业务段；「白名单初始化」清空业务缩写并按包路径重建（@java-package-abbrev-whitelist）
 globs: loit-service/loit-bicycle/**/*.java
 alwaysApply: false
 ---
 
 # 命名缩写白名单（loit-bicycle）
 
-本文件为**可维护白名单**：下列缩写可作为**独立包段**或**标识符中的独立词段**（类/方法/字段等）使用；未列入的缩写默认视为禁止（见 `@java-naming` / `@java-package-naming`）。
+本文件为**可维护白名单**：下列缩写可作为**独立包段**或**标识符中的独立词段**（类/方法/字段等）使用；未列入的缩写默认视为禁止（见 `@java-naming`）。
+
+白名单分两类：
+
+| 类别 | 章节 | 维护方式 |
+|------|------|----------|
+| **项目结构缩写** | `分层/类型`、`架构角色`、`基础设施/通用` | **只读**；`dto`、`vo`、`dao`、`controller` 等必须保留；初始化、对话添加/移除**不得**修改 |
+| **非项目结构缩写（业务）** | `项目/业务`、机器可读列表「业务段」、`模块扫描备案` | **可维护**；对话添加/移除默认落点；**初始化**时清空后按包路径扫描重建 |
 
 ## 对话维护协议（Agent 必须执行）
 
-用户在对话框中要求维护白名单时，**直接编辑本文件** `java-package-abbrev-whitelist.mdc`，勿只口头确认。
+用户在对话框中要求维护白名单时，**直接编辑本文件** `java-package-abbrev-whitelist.mdc`，勿只口头确认。**仅修改 `.cursor/rules`，不修改** `loit-service/**` 业务源码。
 
 ### 匹配规则
 
 - **大小写**：比较与写入时一律视为不区分大小写；落盘格式统一为**全小写**（如用户输入 `DTO` → 写入 `dto`）。
-- **去重**：若缩写（忽略大小写）已存在于任一张量表或「机器可读列表」中，跳过并告知「`xxx` 已在白名单中」，不重复添加。
+- **去重**：若缩写（忽略大小写）已存在于任一张量表或「机器可读列表」任一段中，跳过并告知「`xxx` 已在白名单中」，不重复添加。
+- **结构段保护**：`dto`、`vo`、`dao` 等标准结构缩写仅存在于只读三章；对话添加/移除/初始化**不得**删改只读章节与机器可读列表「标准结构段」。
+
+### 初始化 — 触发语句（任一种即可）
+
+- `白名单初始化` / `初始化白名单` / `whitelist init` / `@java-package-abbrev-whitelist init`
+
+**步骤（Agent 必须按序执行）**：
+
+1. **清空可维护业务缩写**
+   - 删除 `## 项目 / 业务` 表格全部数据行（保留表头）
+   - 将机器可读列表「**项目/业务（可维护）**」代码块内容清空为占位注释（保留代码块外壳）
+   - 将 `## 模块扫描备案` 重置为：`（待初始化扫描）`
+
+2. **切换 Plan 模式**（`SwitchMode` → `plan`）
+
+3. **询问用户包路径**（`AskQuestion` 或明确文字询问），说明：
+   - 模块简写示例：`company`、`regionmgr`、`bicycleapply`
+   - 完整路径示例：`com.loit.modules.company`
+   - 回复 **`全部`**：扫描 `loit-service/loit-bicycle/src/main/java/com/loit/modules/` 下**全部**一级子模块
+   - **未说明路径**：从下列一级模块中**任选其一**（须在最终回复中写明所选模块；无偏好时优先 `company`）：
+     `abnormalissue`, `base`, `bicycle`, `bicycleapply`, `bridge`, `company`, `complaint`, `creditcheck`, `dashboard`, `datatree`, `deploy`, `dict`, `dynamicsql`, `feign`, `heatmap`, `iconConfig`, `indicator`, `lawenforcement`, `listcolumn`, `longidle`, `mapworld`, `message`, `outboundops`, `pendingcenter`, `position`, `regionmgr`, `rent`, `statistics`, `violationcheck`
+
+4. **只读扫描**（为写规则文件服务，**不修改** `loit-service` 源码）— 见下文「包路径扫描与缩写提取」。
+
+5. **写回规则文件**
+   - 将扫描结果追加到 `## 项目 / 业务` 表（含义列无则 `（待补充）`；备注写来源模块/包路径）
+   - 同步机器可读列表「业务段」= 与 `项目/业务` 表一致（全小写、逗号分隔）
+   - 更新 `## 模块扫描备案`：各模块 Java 文件数、包段、标识符词段摘要
+
+6. **切回 Agent 模式**，回复：保留的结构缩写数量、已清空的业务项、本次扫描包路径、新增缩写、跳过重复项。
+
+**初始化不得**：删改「标准项目结构缩写（只读）」三章；删改机器可读列表「标准结构段」。
 
 ### 添加 — 触发语句（任一种即可）
 
@@ -27,23 +66,28 @@ alwaysApply: false
 
 可选：`白名单添加 <缩写> <含义>` — 若用户提供含义，写入「含义」列；未提供则含义填 `（待补充）`。
 
-**写入位置**：默认追加到「项目 / 业务」表；用户指明分类（如「加到架构角色」）则写入对应章节表格。
+**写入位置**：默认追加到「项目 / 业务」表；用户指明「加到架构角色」等结构章节时，**告知该章节只读，改为写入项目/业务或请用户手动评审**。
 
-**必须同步**：每新增一条，在「机器可读列表」代码块中追加该小写缩写（保持逗号分隔、每行不宜过长可换行）。
+**必须同步**：每新增一条，在机器可读列表「**项目/业务（可维护）**」段追加该小写缩写（逗号分隔）。
 
-完成后简短回复：已添加项、已跳过重复项、更新后的条目数。
+完成后简短回复：已添加项、已跳过重复项、更新后的业务条目数。
 
 ### 移除 — 触发语句
 
 - `白名单移除 <缩写>` / `移除白名单 <缩写>` / `whitelist remove <缩写>`
 
-从所有章节表格删除对应行（忽略大小写匹配），并从「机器可读列表」中删除该缩写。不存在则告知未找到。
+从「项目 / 业务」表删除对应行（忽略大小写）；若缩写仅存在于只读结构章节，**告知为结构缩写不可移除**。从机器可读列表「业务段」删除该缩写。不存在则告知未找到。
 
 ### 查询
 
-- `白名单列表` / `列出白名单` — 回复当前机器可读列表，无需改文件。
+- `白名单列表` / `列出白名单` — 回复标准段 + 业务段机器可读列表，无需改文件。
 
 ---
+
+## 标准项目结构缩写（只读）
+
+> **初始化、对话添加/移除均不得修改本节及以下 `分层/类型`、`架构角色`、`基础设施/通用` 三张表。**
+> `vo`、`dto`、`dao`、`controller`、`service` 等属于项目结构缩写，**必须保留**在白名单中。
 
 ## 分层 / 类型
 
@@ -78,9 +122,9 @@ alwaysApply: false
 | `enums` | 枚举 |
 | `util` | 工具类 |
 | `common` | 公共模块（根路径沿用） |
-| `convert` | 类型/字典转换器（company 模块 `convert` 包） |
+| `convert` | 类型/字典转换器 |
 
-## 项目 / 业务（对话添加默认落点）
+## 项目 / 业务（对话添加默认落点；初始化可清空重建）
 
 | 缩写 | 含义 | 备注 |
 |------|------|------|
@@ -97,13 +141,37 @@ alwaysApply: false
 
 ## 机器可读列表（供 Agent 快速匹配）
 
-以下与上表各章节**完全同步**；对话增删后**必须**更新本段（全小写、逗号分隔）：
+对话增删业务缩写后**必须**更新「业务段」；**禁止**改动「标准结构段」。两段合并即为完整白名单。
+
+### 标准结构段（只读，初始化不删）
 
 ```
 dto, vo, bo, entity, dao, api, config, constant, constants, enums, util, common, convert,
-controller, service, impl, handler, listener, consumer, producer,
+controller, service, impl, handler, listener, consumer, producer
+```
+
+### 项目/业务（可维护，初始化清空后重建）
+
+```
 mgr, cfg, sql, agg, stat, stats, feign, census, mongo, regionmgr
 ```
+
+## 包路径扫描与缩写提取（初始化 / 只读）
+
+扫描根路径：`loit-service/loit-bicycle/src/main/java/com/loit/modules/<module>/`（`全部` 时遍历所有一级 `<module>`）。
+
+**标准结构段集合（扫描时跳过，不写入业务表）**：
+
+```
+dto, vo, bo, entity, dao, api, config, constant, constants, enums, util, common, convert,
+controller, service, impl, handler, listener, consumer, producer, modules, loit, com, java, main
+```
+
+**包段候选**：解析 `package` 声明中 `com.loit.modules.<module>` 之后的各段；全小写、长度 ≥ 2、不在标准结构段集合中、非模块目录名本身（如 `company`、`regionmgr` 模块根名默认不入表，除非作为粘连包段如 `regionmgr` 段名出现在路径中）。
+
+**标识符候选**：对 `.java` 文件名（PascalCase）按大写边界拆词，转小写；剔除标准结构段、模块全词（`bicycle`、`company`、`region`、`school` 等常见英文全词）；保留长度 2–12 的疑似业务缩写（如 `Cfg`→`cfg`、`Census`→`census`）。同一缩写多模块出现只录入一次。
+
+**写回**：去重、全小写；与标准结构段重复则跳过；录入 `项目/业务` 表并同步业务机器可读段；更新 `模块扫描备案` 摘要。
 
 ## 模块扫描备案（company / regionmgr）
 
@@ -121,4 +189,5 @@ mgr, cfg, sql, agg, stat, stats, feign, census, mongo, regionmgr
 ## 手动维护
 
 - 命名评审：`@java-naming` + `@java-package-abbrev-whitelist`
-- 对话：`白名单添加 mgr 区域管理` — Agent 按上文协议自动改文件
+- 对话添加：`白名单添加 mgr 区域管理`
+- 业务缩写重建：`白名单初始化`（保留 dto/vo/dao 等结构缩写，清空并重建业务段）
